@@ -1,7 +1,6 @@
 // Sample content.js, adjust according to the coding contest websites
 var contests = [
-    { name: 'Contest 1', timing: '2024-01-01 12:00 PM', link: 'https://contest1.com' },
-    { name: 'Contest 2', timing: '2024-01-15 3:00 PM', link: 'https://contest2.com' },
+    { name: 'CF Sample round', timing: 'Jan/15/2024 20:05UTC+5.5', link: 'https://codeforces.com/contests/1921' },
   ];
   
   chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
