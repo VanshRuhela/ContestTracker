@@ -8,5 +8,4 @@ var contests = [
       sendResponse({ contests: contests });
     }
   });
-  
-// empty commit
+
