@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data</title>
+</head>
+<body>
+    <h2>Top 20 Records</h2>
+    <table border="1">
+        <tr>
+            {% for column in data[0] %}
+                <th>{{ column }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data[1:] %}
+            <tr>
+                {% for value in row %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    <form action="/download_csv" method="post">
+        <input type="hidden" name="columns" value="{{ ','.join(data[0]) }}">
+        <button type="submit">Download CSV</button>
+    </form>
+</body>
+</html>
