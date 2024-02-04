@@ -6,66 +6,81 @@ public class GroupByRandomNumberExample {
     public static void main(String[] args) {
         // Sample dataItems with different timestamps
         List<DataItem> dataItems = Arrays.asList(
-                new DataItem(LocalDate.of(2022, 1, 1), "OtherData1"),
-                new DataItem(LocalDate.of(2022, 1, 1), "OtherData2"),
-                new DataItem(LocalDate.of(2022, 1, 2), "OtherData3"),
-                new DataItem(LocalDate.of(2022, 1, 2), "OtherData4"),
-                new DataItem(LocalDate.of(2022, 1, 3), "OtherData5"),
-                new DataItem(LocalDate.of(2022, 1, 3), "OtherData6"),
-                new DataItem(LocalDate.of(2022, 1, 4), "OtherData7"),
-                new DataItem(LocalDate.of(2022, 1, 4), "OtherData8"),
-                new DataItem(LocalDate.of(2022, 1, 5), "OtherData9"),
-                new DataItem(LocalDate.of(2022, 1, 5), "OtherData10")
+                new DataItem(LocalDate.of(2022-01-01), "OtherData1"),
+                new DataItem(LocalDate.of(2022-01-01), "OtherData2"),
+                new DataItem(LocalDate.of(2022-01-02), "OtherData3"),
+                new DataItem(LocalDate.of(2022-01-02), "OtherData4"),
+                new DataItem(LocalDate.of(2022-01-03), "OtherData5"),
+                new DataItem(LocalDate.of(2022-01-03), "OtherData6"),
+                new DataItem(LocalDate.of(2022-01-04), "OtherData7"),
+                new DataItem(LocalDate.of(2022-01-04), "OtherData8"),
+                new DataItem(LocalDate.of(2022-01-05), "OtherData9"),
+                new DataItem(LocalDate.of(2022-01-05), "OtherData10")
         );
 
         // Group the dataItems by composite key
         Map<String, List<DataItem>> groupedByCompositeKey = dataItems.stream()
                 .collect(Collectors.groupingBy(DataItem::getCompositeKey));
 
-        // Assign a random number to each group and create a map
+        // Generate a random string of 6 digits
         Random random = new Random();
-        Map<Integer, List<DataItem>> groupedByRandomNumber = groupedByCompositeKey.entrySet().stream()
+        Map<String, List<DataItem>> groupedByRandomString = groupedByCompositeKey.entrySet().stream()
                 .collect(Collectors.toMap(
-                        entry -> random.nextInt(), // Random number as key
+                        entry -> generateRandomString(random, 6), // Random string as key
                         Map.Entry::getValue            // List of DataItems as value
                 ));
 
-        // Create a new list with random ID and composite key
-        List<NewItem> newList = new ArrayList<>();
-        int idCounter = 1;
+        // Print dataItems
+        System.out.println("Original DataItems:");
+        dataItems.forEach(System.out::println);
+        System.out.println("---------------------");
 
-        for (Map.Entry<Integer, List<DataItem>> entry : groupedByRandomNumber.entrySet()) {
-            int randomNumber = entry.getKey();
-            List<DataItem> dataItemList = entry.getValue();
+        // Print groupedByRandomString
+        System.out.println("GroupedByRandomString:");
+        groupedByRandomString.forEach((randomString, items) -> {
+            System.out.println("Random String: " + randomString);
+            items.forEach(item -> System.out.println("  " + item));
+        });
+        System.out.println("---------------------");
 
-            for (DataItem dataItem : dataItemList) {
-                String compositeKey = dataItem.getCompositeKey();
-                newList.add(new NewItem(idCounter++, randomNumber, compositeKey));
-            }
-        }
+        // Create a new list with composite key, other data, and random string
+        List<NewDataItem> newDataItems = groupedByRandomString.entrySet().stream()
+                .flatMap(entry -> entry.getValue().stream()
+                        .map(dataItem -> new NewDataItem(entry.getKey(), dataItem.getCompositeKey(), dataItem.getOtherData())))
+                .collect(Collectors.toList());
 
-        // Print the result
-        newList.forEach(System.out::println);
+        // Print newDataItems
+        System.out.println("NewDataItems:");
+        newDataItems.forEach(System.out::println);
     }
 
-    static class NewItem {
-        private int id;
-        private int randomNumber;
-        private String compositeKey;
-
-        public NewItem(int id, int randomNumber, String compositeKey) {
-            this.id = id;
-            this.randomNumber = randomNumber;
-            this.compositeKey = compositeKey;
+    // Helper method to generate a random string of given length
+    private static String generateRandomString(Random random, int length) {
+        StringBuilder randomString = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            randomString.append(random.nextInt(10)); // Append random digit (0-9)
         }
+        return randomString.toString();
+    }
+}
 
-        @Override
-        public String toString() {
-            return "NewItem{" +
-                    "id=" + id +
-                    ", randomNumber=" + randomNumber +
-                    ", compositeKey='" + compositeKey + '\'' +
-                    '}';
-        }
+class NewDataItem {
+    private final String randomString;
+    private final String compositeKey;
+    private final String otherData;
+
+    public NewDataItem(String randomString, String compositeKey, String otherData) {
+        this.randomString = randomString;
+        this.compositeKey = compositeKey;
+        this.otherData = otherData;
+    }
+
+    @Override
+    public String toString() {
+        return "NewDataItem{" +
+                "randomString='" + randomString + '\'' +
+                ", compositeKey='" + compositeKey + '\'' +
+                ", otherData='" + otherData + '\'' +
+                '}';
     }
 }
