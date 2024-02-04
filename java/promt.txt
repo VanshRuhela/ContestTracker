@@ -1,0 +1,15 @@
+=== CHAT GPT prompt given ====
+
+First create the dataIteam1 as an entity mapped to a table and repository. The dataIteam contains data1 , data2 , data3 , data4.
+data1,data2 creates the composite key for the entitiy. Use @Id for data1 and data2.
+data3 is a date, data4 is someother data.
+
+I have another dataIteam2. It contians data1,data2,date3,data4.
+For this entitiy it has the same data1 and data2 as composite key as it for dataIteam1.
+
+Create some sample list out of the above dataIteam entity call it dataItemList.
+
+From the dataIteamList now seperate the  sample dataIteamList based on the date field which is data3 for dataIteam1. Create a map  , where the key is a random string and the value is a list of data where the dataIteamList's data3 date is same for all. Call this map groupedByDateMap.
+
+From the groupedByDate create a new list of datatype dataIteam2 which only contains the composite key values as defined above, some other data and the random  generated string. 
+

@@ -1,57 +1,52 @@
+import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GroupByRandomNumberExample {
+public class DataProcessing {
+
     public static void main(String[] args) {
-        // Sample dataItems with different timestamps
-        List<DataItem> dataItems = Arrays.asList(
-                new DataItem(LocalDate.of(2022-01-01), "OtherData1"),
-                new DataItem(LocalDate.of(2022-01-01), "OtherData2"),
-                new DataItem(LocalDate.of(2022-01-02), "OtherData3"),
-                new DataItem(LocalDate.of(2022-01-02), "OtherData4"),
-                new DataItem(LocalDate.of(2022-01-03), "OtherData5"),
-                new DataItem(LocalDate.of(2022-01-03), "OtherData6"),
-                new DataItem(LocalDate.of(2022-01-04), "OtherData7"),
-                new DataItem(LocalDate.of(2022-01-04), "OtherData8"),
-                new DataItem(LocalDate.of(2022-01-05), "OtherData9"),
-                new DataItem(LocalDate.of(2022-01-05), "OtherData10")
+        // Step 1: Create DataItem1 Entity, Repository, and Sample Data
+        List<DataItem1> dataItem1List = Arrays.asList(
+                new DataItem1(new CompositeKey1("Key1", "Key2"), LocalDate.of(2022, 1, 1), "OtherData1"),
+                new DataItem1(new CompositeKey1("Key1", "Key2"), LocalDate.of(2022, 1, 1), "OtherData2"),
+                new DataItem1(new CompositeKey1("Key3", "Key4"), LocalDate.of(2022, 1, 2), "OtherData3"),
+                new DataItem1(new CompositeKey1("Key3", "Key4"), LocalDate.of(2022, 1, 2), "OtherData4"),
+                new DataItem1(new CompositeKey1("Key5", "Key6"), LocalDate.of(2022, 1, 3), "OtherData5"),
+                new DataItem1(new CompositeKey1("Key5", "Key6"), LocalDate.of(2022, 1, 3), "OtherData6"),
+                new DataItem1(new CompositeKey1("Key7", "Key8"), LocalDate.of(2022, 1, 4), "OtherData7")
         );
 
-        // Group the dataItems by composite key
-        Map<String, List<DataItem>> groupedByCompositeKey = dataItems.stream()
-                .collect(Collectors.groupingBy(DataItem::getCompositeKey));
+        // Step 2: Create DataItem2 Entity
+        List<DataItem2> dataItem2List = processDataItem1List(dataItem1List);
 
-        // Generate a random string of 6 digits
-        Random random = new Random();
-        Map<String, List<DataItem>> groupedByRandomString = groupedByCompositeKey.entrySet().stream()
-                .collect(Collectors.toMap(
-                        entry -> generateRandomString(random, 6), // Random string as key
-                        Map.Entry::getValue            // List of DataItems as value
+        // Print Output
+        System.out.println("DataItem1 List:");
+        dataItem1List.forEach(System.out::println);
+
+        System.out.println("\nDataItem2 List:");
+        dataItem2List.forEach(System.out::println);
+    }
+
+    private static List<DataItem2> processDataItem1List(List<DataItem1> dataItem1List) {
+        // Step 3: Group by Date and Create groupedByDateMap
+        Map<String, List<DataItem1>> groupedByDateMap = dataItem1List.stream()
+                .collect(Collectors.groupingBy(
+                        dataItem1 -> generateRandomString(new Random(), 6) // Generate random string as key
                 ));
 
-        // Print dataItems
-        System.out.println("Original DataItems:");
-        dataItems.forEach(System.out::println);
-        System.out.println("---------------------");
-
-        // Print groupedByRandomString
-        System.out.println("GroupedByRandomString:");
-        groupedByRandomString.forEach((randomString, items) -> {
-            System.out.println("Random String: " + randomString);
-            items.forEach(item -> System.out.println("  " + item));
-        });
-        System.out.println("---------------------");
-
-        // Create a new list with composite key, other data, and random string
-        List<NewDataItem> newDataItems = groupedByRandomString.entrySet().stream()
+        // Step 4: Create DataItem2 List from groupedByDateMap
+        return groupedByDateMap.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream()
-                        .map(dataItem -> new NewDataItem(entry.getKey(), dataItem.getCompositeKey(), dataItem.getOtherData())))
+                        .map(dataItem1 -> new DataItem2(
+                                new CompositeKey1(dataItem1.getCompositeKey().getData1(), dataItem1.getCompositeKey().getData2()),
+                                dataItem1.getDateField(),
+                                dataItem1.getSomeOtherData(),
+                                entry.getKey() // Random string as some other data
+                        ))
+                )
                 .collect(Collectors.toList());
-
-        // Print newDataItems
-        System.out.println("NewDataItems:");
-        newDataItems.forEach(System.out::println);
     }
 
     // Helper method to generate a random string of given length
@@ -62,25 +57,50 @@ public class GroupByRandomNumberExample {
         }
         return randomString.toString();
     }
-}
 
-class NewDataItem {
-    private final String randomString;
-    private final String compositeKey;
-    private final String otherData;
+    // Step 1: Create DataItem1 Entity, Repository, and Sample Data
+    @Entity
+    @Table(name = "data_item1")
+    public static class DataItem1 implements Serializable {
 
-    public NewDataItem(String randomString, String compositeKey, String otherData) {
-        this.randomString = randomString;
-        this.compositeKey = compositeKey;
-        this.otherData = otherData;
+        @EmbeddedId
+        private CompositeKey1 compositeKey;
+
+        @Column(name = "date_field")
+        private LocalDate dateField;
+
+        @Column(name = "some_other_data")
+        private String someOtherData;
+
+        // Constructors, getters, setters...
     }
 
-    @Override
-    public String toString() {
-        return "NewDataItem{" +
-                "randomString='" + randomString + '\'' +
-                ", compositeKey='" + compositeKey + '\'' +
-                ", otherData='" + otherData + '\'' +
-                '}';
+    @Embeddable
+    public static class CompositeKey1 implements Serializable {
+
+        @Column(name = "data1")
+        private String data1;
+
+        @Column(name = "data2")
+        private String data2;
+
+        // Constructors, getters, setters...
+    }
+
+    // Step 2: Create DataItem2 Entity
+    @Entity
+    @Table(name = "data_item2")
+    public static class DataItem2 implements Serializable {
+
+        @EmbeddedId
+        private CompositeKey1 compositeKey; // Reusing CompositeKey1 for data1 and data2
+
+        @Column(name = "date_field")
+        private LocalDate dateField;
+
+        @Column(name = "some_other_data")
+        private String someOtherData;
+
+        // Constructors, getters, setters...
     }
 }
